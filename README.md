@@ -82,29 +82,29 @@ Determine when to send a drip email to a prospect:
 ```java
 
 public class MyBusinessLogic {
-	
-	private RuleEvaluator<Boolean> ruleEvaluator = new RuleEvaluator<>();
-	
-	public void doSomething() {
-		
-		// Set up the context
-		Map<String, Object> context = new HashMap<>();
+
+    private RuleEvaluator<Boolean> ruleEvaluator = new RuleEvaluator<>();
+
+    public void doSomething() {
+
+        // Set up the context
+        Map<String, Object> context = new HashMap<>();
         context.put("age", 20);
         this.ruleEvaluator.withContext(context);
-        
+
         // Define the business rule -- this could be defined externally (i.e., in a yml file) and loaded in
         String expr = "(age >= 18 AND age <= 21)";
-        
+
         try {
-        	// Evaluate the rule
-        	Boolean result = this.ruleEvaluator.evaluate(expr);
+            // Evaluate the rule
+            Boolean result = this.ruleEvaluator.evaluate(expr);
         } catch (ScriptException e) {
-        	// Handle the exception
+            // Handle the exception
         }
 
-		
-	}
-	
+
+    }
+
 }
 
 ```
