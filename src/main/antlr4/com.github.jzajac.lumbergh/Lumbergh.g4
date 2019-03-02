@@ -15,8 +15,8 @@ STRING  :  '"' (~["])* '"' | '\'' (~['])* '\''
         }
         ;
 EQ      : '=' '=' ? ;
-LE      : '<=' ;
-GE      : '>=' ;
+LTE      : '<=' ;
+GTE      : '>=' ;
 NE      : '!=' ;
 LT      : '<' ;
 GT      : '>' ;
@@ -32,7 +32,9 @@ parse : ( expr_list )* EOF
      ;
 
 expr_list
-    : expr ((AND | OR) expr)*
+    : expr                      # Expression
+    | expr AND expr             # AndExpression
+    | expr OR expr              # OrExpression
     ;
 
 expr
@@ -40,11 +42,11 @@ expr
     ;
 
 condition
-    : predicate                 # PredicateExpression
-    | predicate ADD predicate   # PredicateAddExpression
-    | predicate SUB predicate   # PredicateSubExpression
-    | condition AND condition   # AndExpression
-    | condition OR condition    # OrExpression
+    : predicate                 # PredicateCondition
+    | predicate ADD predicate   # AddCondition
+    | predicate SUB predicate   # SubtractCondition
+    | condition AND condition   # AndCondition
+    | condition OR condition    # OrCondition
     ;
 
 reference : element (SEP element)* ;
@@ -63,12 +65,12 @@ term
     ;
 
 operator
-    : LE
-    | GE
+    : LTE
+    | GTE
+    | EQ
     | NE
     | LT
     | GT
-    | EQ
     ;
 
 mathoperator
@@ -87,7 +89,6 @@ value
    | STRING       # StringValue
    | ID           # StringValue
    ;
-
 
 K_AND : A N D;
 K_IN : I N;

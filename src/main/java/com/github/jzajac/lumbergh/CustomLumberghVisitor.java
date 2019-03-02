@@ -3,22 +3,13 @@ package com.github.jzajac.lumbergh;
 import com.github.jzajac.lumbergh.LumberghBaseVisitor;
 import com.github.jzajac.lumbergh.LumberghParser;
 import com.github.jzajac.lumbergh.LumberghParser.*;
+
 public class CustomLumberghVisitor extends LumberghBaseVisitor<String> {
 
 
 	@Override
 	public String visitParse(ParseContext ctx) {
 		return visit(ctx.expr_list(0));
-	}
-
-	@Override
-	public String visitExpr_list(Expr_listContext ctx) {
-		StringBuilder sb = new StringBuilder();
-
-		ctx.expr()
-				.forEach(expr -> sb.append(visit(expr)));
-
-		return sb.toString();
 	}
 
 	@Override
@@ -31,8 +22,44 @@ public class CustomLumberghVisitor extends LumberghBaseVisitor<String> {
 		return sb.toString();
 	}
 
+
+	@Override
+	public String visitExpression(ExpressionContext ctx) {
+		return visit(ctx.expr());
+	}
+
 	@Override
 	public String visitAndExpression(AndExpressionContext ctx) {
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < ctx.expr().size(); i++) {
+			sb.append(visit(ctx.expr(i)));
+
+			if (i < ctx.expr().size() - 1) {
+				sb.append(" && ");
+			}
+		}
+
+		return sb.toString();
+	}
+
+	@Override
+	public String visitOrExpression(OrExpressionContext ctx) {
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < ctx.expr().size(); i++) {
+			sb.append(visit(ctx.expr(i)));
+
+			if (i < ctx.expr().size() - 1) {
+				sb.append(" || ");
+			}
+		}
+
+		return sb.toString();
+	}
+
+	@Override
+	public String visitAndCondition(AndConditionContext ctx) {
 		StringBuilder sb = new StringBuilder();
 
 		for (int i = 0; i < ctx.condition().size(); i++) {
@@ -47,22 +74,18 @@ public class CustomLumberghVisitor extends LumberghBaseVisitor<String> {
 	}
 
 	@Override
-	public String visitPredicateAddExpression(PredicateAddExpressionContext ctx) {
-		return super.visitPredicateAddExpression(ctx);
+	public String visitAddCondition(AddConditionContext ctx) {
+		return super.visitAddCondition(ctx);
 	}
 
 	@Override
-	public String visitPredicateExpression(PredicateExpressionContext ctx) {
+	public String visitPredicateCondition(PredicateConditionContext ctx) {
 		return visit(ctx.predicate());
 	}
 
-	@Override
-	public String visitPredicateSubExpression(PredicateSubExpressionContext ctx) {
-		return super.visitPredicateSubExpression(ctx);
-	}
 
 	@Override
-	public String visitOrExpression(OrExpressionContext ctx) {
+	public String visitOrCondition(OrConditionContext ctx) {
 		StringBuilder sb = new StringBuilder();
 
 		for (int i = 0; i < ctx.condition().size(); i++) {
@@ -94,7 +117,7 @@ public class CustomLumberghVisitor extends LumberghBaseVisitor<String> {
 
 	@Override
 	public String visitMathPredicate(MathPredicateContext ctx) {
-		return super.visitMathPredicate(ctx);
+		return "" + visit(ctx.reference()) + " " + visit(ctx.mathoperator()) + " " + visit(ctx.term()) + " ";
 	}
 
 	@Override
@@ -104,13 +127,41 @@ public class CustomLumberghVisitor extends LumberghBaseVisitor<String> {
 
 	@Override
 	public String visitTerm(TermContext ctx) {
-		return "'" + ctx.getText() + "'";
+		if (ctx.reference() != null) {
+			return "'" + ctx.reference().getText() + "'";
+		}
+		else if (ctx.value() != null) {
+			return "" + ctx.value().getText() + "";
+		}
+
+		return "";
 	}
 
 	@Override
 	public String visitOperator(OperatorContext ctx) {
-		if (ctx.getText().equals(ctx.EQ().getText())) {
+		// Equals
+		if (ctx.EQ() != null) {
 			return " == ";
+		}
+		// Not equals
+		else if (ctx.NE() != null) {
+			return " != ";
+		}
+		// Less than equal
+		else if (ctx.LTE() != null) {
+			return " <= ";
+		}
+		// Greater than equal
+		else if (ctx.GTE() != null) {
+			return " >= ";
+		}
+		// Less than
+		else if (ctx.LT() != null) {
+			return " < ";
+		}
+		// Greater than
+		else if (ctx.GT() != null) {
+			return " > ";
 		}
 
 		return "";
@@ -118,7 +169,14 @@ public class CustomLumberghVisitor extends LumberghBaseVisitor<String> {
 
 	@Override
 	public String visitMathoperator(MathoperatorContext ctx) {
-		return super.visitMathoperator(ctx);
+		if (ctx.getText().equals(ctx.ADD().getText())) {
+			return " + ";
+		}
+		else if (ctx.getText().equals(ctx.ADD().getText())) {
+			return " - ";
+		}
+
+		return "";
 	}
 
 	@Override
